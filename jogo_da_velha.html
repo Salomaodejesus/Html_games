@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            cursor: pointer;
+            color: white;
+        }
+        .cell.winner {
+            background-color: #2ecc71;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="gameBoard"></div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const gameBoard = document.getElementById('gameBoard');
+        const message = document.getElementById('message');
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = Array.from(gameBoard.children).indexOf(clickedCell);
+
+            if (board[clickedCellIndex] !== '' || !gameActive) {
+                return;
+            }
+
+            board[clickedCellIndex] = currentPlayer;
+            clickedCell.textContent = currentPlayer;
+
+            checkResult();
+        }
+
+        function checkResult() {
+            let roundWon = false;
+
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    roundWon = true;
+                    document.getElementById('gameBoard').children[a].classList.add('winner');
+                    document.getElementById('gameBoard').children[b].classList.add('winner');
+                    document.getElementById('gameBoard').children[c].classList.add('winner');
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                message.textContent = `Jogador ${currentPlayer} venceu!`;
+                gameActive = false;
+                return;
+            }
+
+            if (!board.includes('')) {
+                message.textContent = 'Empate!';
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            message.textContent = `É a vez do Jogador ${currentPlayer}`;
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            message.textContent = `É a vez do Jogador ${currentPlayer}`;
+            Array.from(gameBoard.children).forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('winner');
+            });
+        }
+
+        function createBoard() {
+            gameBoard.innerHTML = '';
+            board.forEach((_, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.addEventListener('click', handleCellClick);
+                gameBoard.appendChild(cell);
+            });
+            resetGame();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #gameContainer {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        #word {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #inputField {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        #score {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <div id="word">Press "Start" to begin</div>
+    <input type="text" id="inputField" placeholder="Type the word here..." disabled />
+    <div id="score">Score: 0</div>
+    <button id="startButton">Start</button>
+</div>
+
+<script>
+    const words = ["apple", "banana", "orange", "grape", "melon", "cherry", "peach", "pear", "plum", "kiwi"];
+    let currentWord = '';
+    let score = 0;
+    let isPlaying = false;
+    let timer;
+    
+    const wordDisplay = document.getElementById('word');
+    const inputField = document.getElementById('inputField');
+    const scoreDisplay = document.getElementById('score');
+    const startButton = document.getElementById('startButton');
+    
+    function startGame() {
+        isPlaying = true;
+        score = 0;
+        inputField.value = '';
+        inputField.disabled = false;
+        inputField.focus();
+        startButton.disabled = true;
+        nextWord();
+        startTimer();
+    }
+
+    function startTimer() {
+        let timeLeft = 60;
+        timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                endGame();
+                clearInterval(timer);
+            } else {
+                wordDisplay.innerHTML = `${currentWord} | Time Left: ${timeLeft}s`;
+                timeLeft--;
+            }
+        }, 1000);
+    }
+    
+    function nextWord() {
+        const randomIndex = Math.floor(Math.random() * words.length);
+        currentWord = words[randomIndex];
+        wordDisplay.innerHTML = currentWord;
+        inputField.value = '';
+    }
+
+    function checkInput() {
+        const userInput = inputField.value.trim();
+        if (userInput === currentWord && isPlaying) {
+            score++;
+            scoreDisplay.innerHTML = `Score: ${score}`;
+            nextWord();
+        }
+    }
+
+    function endGame() {
+        isPlaying = false;
+        wordDisplay.innerHTML = `Game Over! Your final score is ${score}`;
+        inputField.disabled = true;
+        startButton.disabled = false;
+    }
+
+    inputField.addEventListener('input', checkInput);
+    startButton.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>

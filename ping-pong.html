@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        #pongGame {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: #333;
+            overflow: hidden;
+        }
+        .paddle {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background-color: #fff;
+        }
+        #playerPaddle {
+            left: 0;
+        }
+        #aiPaddle {
+            right: 0;
+        }
+        #ball {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #fff;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="pongGame">
+        <div id="playerPaddle" class="paddle"></div>
+        <div id="aiPaddle" class="paddle"></div>
+        <div id="ball"></div>
+    </div>
+
+    <script>
+        const pongGame = document.getElementById('pongGame');
+        const playerPaddle = document.getElementById('playerPaddle');
+        const aiPaddle = document.getElementById('aiPaddle');
+        const ball = document.getElementById('ball');
+
+        let playerPaddleY = 160;
+        let aiPaddleY = 160;
+        let ballX = 292.5;
+        let ballY = 192.5;
+        let ballVelocityX = 4;
+        let ballVelocityY = 4;
+        const paddleSpeed = 5;
+        const gameHeight = 400;
+        const gameWidth = 600;
+
+        function movePaddle(event) {
+            if (event.key === 'ArrowUp' && playerPaddleY > 0) {
+                playerPaddleY -= paddleSpeed;
+            } else if (event.key === 'ArrowDown' && playerPaddleY < gameHeight - playerPaddle.offsetHeight) {
+                playerPaddleY += paddleSpeed;
+            }
+            playerPaddle.style.top = playerPaddleY + 'px';
+        }
+
+        function aiMove() {
+            const aiCenter = aiPaddleY + aiPaddle.offsetHeight / 2;
+            if (aiCenter < ballY) {
+                aiPaddleY += paddleSpeed;
+            } else if (aiCenter > ballY) {
+                aiPaddleY -= paddleSpeed;
+            }
+            aiPaddle.style.top = aiPaddleY + 'px';
+        }
+
+        function moveBall() {
+            ballX += ballVelocityX;
+            ballY += ballVelocityY;
+
+            if (ballY <= 0 || ballY >= gameHeight - ball.offsetHeight) {
+                ballVelocityY *= -1;
+            }
+
+            if (
+                (ballX <= playerPaddle.offsetWidth &&
+                 ballY >= playerPaddleY &&
+                 ballY <= playerPaddleY + playerPaddle.offsetHeight) ||
+                (ballX >= gameWidth - playerPaddle.offsetWidth - ball.offsetWidth &&
+                 ballY >= aiPaddleY &&
+                 ballY <= aiPaddleY + aiPaddle.offsetHeight)
+            ) {
+                ballVelocityX *= -1;
+            }
+
+            if (ballX <= 0 || ballX >= gameWidth - ball.offsetWidth) {
+                resetBall();
+            }
+
+            ball.style.left = ballX + 'px';
+            ball.style.top = ballY + 'px';
+        }
+
+        function resetBall() {
+            ballX = gameWidth / 2 - ball.offsetWidth / 2;
+            ballY = gameHeight / 2 - ball.offsetHeight / 2;
+            ballVelocityX *= -1;
+        }
+
+        function gameLoop() {
+            moveBall();
+            aiMove();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', movePaddle);
+        gameLoop();
+    </script>
+</body>
+</html>

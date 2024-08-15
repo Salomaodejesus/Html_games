@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #70c5ce;
+            overflow: hidden;
+        }
+        #gameArea {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            background-color: #4ec0ca;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+        #bird {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: yellow;
+            border-radius: 50%;
+        }
+        .pipe {
+            position: absolute;
+            width: 50px;
+            background-color: green;
+        }
+        .pipe.top {
+            top: 0;
+        }
+        .pipe.bottom {
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="bird"></div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const bird = document.getElementById('bird');
+
+        let birdY = 250;
+        let gravity = 2;
+        let lift = -30;
+        let birdVelocity = 0;
+        let pipes = [];
+        let pipeWidth = 50;
+        let pipeGap = 120;
+        let pipeFrequency = 1500; // in milliseconds
+        let pipeSpeed = 2;
+        let isGameOver = false;
+
+        function createPipe() {
+            const pipeHeight = Math.floor(Math.random() * 200) + 50;
+
+            const pipeTop = document.createElement('div');
+            pipeTop.classList.add('pipe', 'top');
+            pipeTop.style.height = pipeHeight + 'px';
+            pipeTop.style.left = '300px';
+
+            const pipeBottom = document.createElement('div');
+            pipeBottom.classList.add('pipe', 'bottom');
+            pipeBottom.style.height = (500 - pipeHeight - pipeGap) + 'px';
+            pipeBottom.style.left = '300px';
+
+            gameArea.appendChild(pipeTop);
+            gameArea.appendChild(pipeBottom);
+
+            pipes.push({ top: pipeTop, bottom: pipeBottom });
+
+            if (!isGameOver) {
+                setTimeout(createPipe, pipeFrequency);
+            }
+        }
+
+        function movePipes() {
+            pipes.forEach(pipe => {
+                pipe.top.style.left = (parseInt(pipe.top.style.left) - pipeSpeed) + 'px';
+                pipe.bottom.style.left = (parseInt(pipe.bottom.style.left) - pipeSpeed) + 'px';
+
+                if (parseInt(pipe.top.style.left) < -pipeWidth) {
+                    pipe.top.remove();
+                    pipe.bottom.remove();
+                    pipes.shift();
+                }
+            });
+        }
+
+        function checkCollision() {
+            pipes.forEach(pipe => {
+                const pipeLeft = parseInt(pipe.top.style.left);
+                const pipeRight = pipeLeft + pipeWidth;
+                const pipeTopHeight = parseInt(pipe.top.style.height);
+                const pipeBottomHeight = parseInt(pipe.bottom.style.height);
+
+                if (
+                    pipeLeft < 30 && pipeRight > 0 &&
+                    (birdY < pipeTopHeight || birdY > (500 - pipeBottomHeight))
+                ) {
+                    isGameOver = true;
+                }
+            });
+
+            if (birdY > 470 || birdY < 0) {
+                isGameOver = true;
+            }
+        }
+
+        function gameLoop() {
+            birdVelocity += gravity;
+            birdY += birdVelocity;
+
+            bird.style.top = birdY + 'px';
+
+            movePipes();
+            checkCollision();
+
+            if (!isGameOver) {
+                requestAnimationFrame(gameLoop);
+            } else {
+                alert('Game Over!');
+            }
+        }
+
+        function flap() {
+            birdVelocity = lift;
+        }
+
+        document.addEventListener('keydown', flap);
+        document.addEventListener('click', flap);
+
+        createPipe();
+        gameLoop();
+    </script>
+</body>
+</html>
